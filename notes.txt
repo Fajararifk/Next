@@ -1,0 +1,17 @@
+jalankan ini terlebih dahulu
+--npx prisma db pull
+#setelah di pull 
+--npx prisma generate
+#kemudian di generate
+--npx prisma db push
+#kemudian di push
+
+--npx prisma migrate reset
+untuk menghilangkan semua data di db
+
+
+--npx prisma studio
+#untuk menjalankan prisma di localhost:5555
+
+--npm run dev
+#untuk menjalankan localhost:3000
