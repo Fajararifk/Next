@@ -4,7 +4,7 @@ import { PrismaAdapter} from "@auth/prisma-adapter"
 import { db } from "./lib/db"
 import { getUserById } from "./data/user"
 import { UserRole } from "@prisma/client"
-import { use } from "react"
+import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmation"
 
 export const {
     handlers: {GET, POST},
@@ -14,7 +14,8 @@ export const {
 } = NextAuth({
     pages:{
         signIn:"/auth/login",
-        error: "/auth/error"
+        error: "/auth/error",
+        signOut:"/auth/login",
     },
     events:{
         async linkAccount({user}){
@@ -25,14 +26,26 @@ export const {
         }
     },
     callbacks: {
-        // async signIn({ user }) {
-        //     const existingUser = await getUserById(user.id)
-        //     if(!existingUser || !existingUser.emailVerified) {
-        //         return false
-        //     }
-        //     return true 
-        // },
+        async signIn({ user , account }) {
+            
+            //if(account?.provider === "credentials") return true
+            if(account?.provider !== "credentials") return true
+            const existingUser = await getUserById(user.id)
+            if(!existingUser?.emailVerified) {
+                return false
+            }
 
+            if(existingUser.isTwoFactorEnable) {
+                const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id)
+                if(!twoFactorConfirmation) return false
+
+                await db.twoFactorConfirmation.delete({
+                    where: { id: twoFactorConfirmation.id}
+                })
+            }
+
+            return true 
+        },
         async jwt({ token }) {
             if(!token.sub)  return token
             const existingUser = await getUserById(token.sub)

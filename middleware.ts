@@ -10,7 +10,7 @@ import {
 
 const { auth } = NextAuth(authConfig)
 export default auth((req) => {
-    debugger;
+    
     const { nextUrl } = req
     const isLoggedIn = !!req.auth;
 
